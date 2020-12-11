@@ -347,6 +347,8 @@ class Session(GuestSession):
         Returns:
             list: List of tuples (Work, number-of-visits, datetime-last-visited)
         """
+
+        # print(f"get_history starting at {start_page} running to {max_pages}")
         
         if self._history is None:
             self._history = []
@@ -355,7 +357,7 @@ class Session(GuestSession):
                     # If we are attempting to recover from errors then
                     # catch and loop, otherwise just call and go
                     if timeout_sleep is None:
-                        self._load_history(page=page+1)
+                        self._load_history(page=page+1, min_year=min_year)
                     
                     else:
                         loaded=False
@@ -370,15 +372,15 @@ class Session(GuestSession):
                                 print(f"History being rate limited, sleeping for {timeout_sleep} seconds")
                                 time.sleep(timeout_sleep)
 
-                                # Check for maximum history page load
-                                if max_pages is not None and page >= max_pages:
-                                    return self._history
+                            # Check for maximum history page load
+                            if max_pages is not None and page >= max_pages:
+                                return self._history
 
-                                # Again attempt to avoid rate limiter,
-                                # sleep for a few seconds between page
-                                # requests.
-                                if hist_sleep is not None and hist_sleep > 0:
-                                    time.sleep(hist_sleep)
+                            # Again attempt to avoid rate limiter,
+                            # sleep for a few seconds between page
+                            # requests.
+                            if hist_sleep is not None and hist_sleep > 0:
+                                time.sleep(hist_sleep)
                                     
             except Exception as e:
                 if min_year is not None and str(e) == 'min_year':
